@@ -4,6 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { problems, solveSessions } from "@/lib/db/schema";
 import { InterviewChat } from "@/components/InterviewChat";
+import { SessionRecorder } from "@/components/SessionRecorder";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,7 @@ export default async function InterviewPage({
           {problem.difficulty} · {problem.topic}
         </p>
       </div>
+      <SessionRecorder label="Record this interview (optional)" />
       <InterviewChat
         problemId={problem.id}
         problemTitle={problem.title}
