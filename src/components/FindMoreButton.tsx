@@ -37,17 +37,13 @@ export function FindMoreButton() {
 
   return (
     <div className="space-y-2">
-      <button
-        onClick={find}
-        disabled={loading}
-        className="rounded-lg border border-border px-4 py-2 text-sm text-text-dim transition-colors hover:bg-bg-raised hover:text-text disabled:opacity-40"
-      >
-        {loading ? "Finding…" : "Find me another problem →"}
+      <button onClick={find} disabled={loading} className="btn btn-sm">
+        {loading ? "Finding…" : "Find another →"}
       </button>
       {rec?.problem && (
         <a
           href={`/practice/${rec.problem.id}`}
-          className="block rounded-lg border border-accent/40 bg-bg-raised p-3 text-sm"
+          className="panel block p-3 text-sm"
         >
           <span className="font-medium text-accent">{rec.problem.title}</span>
           <span className="ml-2 text-xs text-text-faint">

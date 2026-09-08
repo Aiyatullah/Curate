@@ -50,7 +50,7 @@ export function AddCompany() {
   return (
     <form
       onSubmit={submit}
-      className="space-y-3 rounded-xl border border-border bg-bg-raised p-4"
+      className="space-y-3 panel p-4"
     >
       <label className="block text-xs text-text-dim">
         <span className="mb-1 block">Company name</span>
@@ -58,7 +58,7 @@ export function AddCompany() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="w-full rounded-md border border-border bg-bg-inset px-2 py-1.5 text-sm text-text"
+          className="w-full px-2 py-1.5 text-sm"
         />
       </label>
       <label className="block text-xs text-text-dim">
@@ -100,7 +100,7 @@ export function AddCompany() {
         <button
           type="submit"
           disabled={busy || !name.trim()}
-          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-bg disabled:opacity-40"
+          className="btn btn-primary btn-sm"
         >
           Add
         </button>

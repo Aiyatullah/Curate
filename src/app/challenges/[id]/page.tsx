@@ -31,10 +31,10 @@ export default async function ChallengePage({
         <Link href="/challenges" className="text-xs text-text-faint hover:text-text-dim">
           ← Challenges
         </Link>
-        <p className="mt-2 font-mono text-xs uppercase tracking-widest text-text-faint">
+        <p className="mt-2 label">
           {KIND_LABEL[challenge.kind] ?? challenge.kind} · {challenge.difficulty}
         </p>
-        <h1 className="mt-1 text-2xl font-semibold">{challenge.title}</h1>
+        <h1 className="display mt-1 text-[length:var(--text-title)]">{challenge.title}</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text-dim">
           {challenge.prompt}
         </p>

@@ -22,13 +22,29 @@ export default async function PracticePage({
 
   return (
     <div className="space-y-8">
-      <div>
-        <Link href="/" className="text-xs text-text-faint hover:text-text-dim">
-          ← Dashboard
+      <div className="reveal reveal-1">
+        <Link
+          href="/problems"
+          className="text-xs text-text-faint transition-colors hover:text-text-dim"
+        >
+          ← Problems
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold">{problem.title}</h1>
-        <p className="mt-1 text-sm text-text-dim">
-          {problem.difficulty} · {problem.topic}
+        <h1 className="display mt-2 text-[length:var(--text-title)]">
+          {problem.title}
+        </h1>
+        <p className="mt-1.5 text-sm text-text-dim">
+          <span
+            className={
+              problem.difficulty === "Easy"
+                ? "text-accent"
+                : problem.difficulty === "Hard"
+                  ? "text-danger"
+                  : "text-accent-warm"
+            }
+          >
+            {problem.difficulty}
+          </span>{" "}
+          · {problem.topic}
           {problem.subtopic ? ` · ${problem.subtopic}` : ""}
         </p>
       </div>

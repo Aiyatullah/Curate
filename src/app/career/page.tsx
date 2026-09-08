@@ -6,6 +6,7 @@ import { getCompanyReadiness } from "@/lib/career/readiness";
 import { Meter } from "@/components/Meter";
 import { ResumeTracker } from "@/components/ResumeTracker";
 import { AddCompany } from "@/components/AddCompany";
+import { PageHeader } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -16,28 +17,20 @@ export default async function CareerPage() {
   ]);
 
   return (
-    <div className="space-y-10">
-      <header>
-        <h1 className="text-2xl font-semibold">Career OS</h1>
-        <p className="mt-1 text-sm text-text-dim">
-          Company readiness is computed live from your knowledge graph, engineering
-          challenges and system-design reviews — nothing to update by hand.
-        </p>
-      </header>
+    <div className="space-y-12">
+      <PageHeader
+        kicker="Career OS"
+        title="Career"
+        description="Company readiness is computed live from your knowledge graph, engineering challenges and system-design reviews — nothing to update by hand."
+      />
 
       <section aria-labelledby="companies-h">
-        <h2
-          id="companies-h"
-          className="mb-3 font-mono text-xs uppercase tracking-widest text-text-faint"
-        >
+        <h2 id="companies-h" className="label mb-3">
           Target companies
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {companiesReady.map((c) => (
-            <article
-              key={c.slug}
-              className="rounded-xl border border-border bg-bg-raised p-4"
-            >
+            <article key={c.slug} className="panel p-4">
               <div className="mb-3 flex items-baseline justify-between">
                 <h3 className="font-semibold">{c.name}</h3>
                 <span className="text-lg font-semibold">{c.overallPct}%</span>
@@ -61,10 +54,7 @@ export default async function CareerPage() {
       </section>
 
       <section aria-labelledby="resume-h">
-        <h2
-          id="resume-h"
-          className="mb-3 font-mono text-xs uppercase tracking-widest text-text-faint"
-        >
+        <h2 id="resume-h" className="label mb-3">
           Resume tracker
         </h2>
         <ResumeTracker initial={resume} />

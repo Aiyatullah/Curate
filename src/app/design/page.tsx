@@ -4,6 +4,7 @@ import { db } from "@/lib/db/client";
 import { systemDesigns } from "@/lib/db/schema";
 import { DESIGN_PROMPTS } from "@/lib/systemdesign/prompts";
 import { NewDesignButton } from "@/components/NewDesignButton";
+import { PageHeader, SectionLabel } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -15,20 +16,15 @@ export default async function DesignListPage() {
     .limit(25);
 
   return (
-    <div className="space-y-8">
-      <header>
-        <h1 className="text-2xl font-semibold">System Design Studio</h1>
-        <p className="mt-1 text-sm text-text-dim">
-          Work a design in seven structured passes — requirements, scale, data
-          model, API, high-level, deep dives, trade-offs — then get a
-          principal-engineer review of what you missed.
-        </p>
-      </header>
+    <div className="space-y-10">
+      <PageHeader
+        kicker="System Design OS"
+        title="Design studio"
+        description="Work a design in seven structured passes — requirements, scale, data model, API, high-level, deep dives, trade-offs — then get a principal-engineer review of what you missed."
+      />
 
       <section>
-        <h2 className="mb-3 font-mono text-xs uppercase tracking-widest text-text-faint">
-          Start a design
-        </h2>
+        <SectionLabel>Start a design</SectionLabel>
         <ul className="grid gap-2 sm:grid-cols-2">
           {DESIGN_PROMPTS.map((p) => (
             <li key={p.title}>
@@ -40,10 +36,8 @@ export default async function DesignListPage() {
 
       {past.length > 0 && (
         <section>
-          <h2 className="mb-3 font-mono text-xs uppercase tracking-widest text-text-faint">
-            Your designs
-          </h2>
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <SectionLabel>Your designs</SectionLabel>
+          <ul className="panel divide-y divide-border overflow-hidden">
             {past.map((d) => (
               <li key={d.id}>
                 <Link

@@ -93,8 +93,8 @@ export function ChallengeSolve({ challengeId, kind, requirements }: Props) {
         </p>
       )}
 
-      <section className="rounded-xl border border-border bg-bg-raised p-5">
-        <h2 className="mb-3 font-mono text-xs uppercase tracking-widest text-text-faint">
+      <section className="panel p-5">
+        <h2 className="label mb-3">
           Requirements — tick as you satisfy them
         </h2>
         <ul className="space-y-1.5 text-sm">
@@ -118,8 +118,8 @@ export function ChallengeSolve({ challengeId, kind, requirements }: Props) {
         </ul>
       </section>
 
-      <section className="rounded-xl border border-border bg-bg-raised p-5">
-        <h2 className="mb-3 font-mono text-xs uppercase tracking-widest text-text-faint">
+      <section className="panel p-5">
+        <h2 className="label mb-3">
           Approach — write this before coding
         </h2>
         <textarea
@@ -128,11 +128,11 @@ export function ChallengeSolve({ challengeId, kind, requirements }: Props) {
           onBlur={save}
           rows={4}
           placeholder="Data structures, component boundaries, failure modes, trade-offs you're choosing…"
-          className="w-full rounded-lg border border-border bg-bg-inset p-3 text-sm outline-none focus:border-accent"
+          className="w-full p-3 text-sm"
         />
       </section>
 
-      <section className="rounded-xl border border-border bg-bg-raised p-5">
+      <section className="panel p-5">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           {LANGS.map((l) => (
             <button
@@ -157,7 +157,7 @@ export function ChallengeSolve({ challengeId, kind, requirements }: Props) {
               ? "Write your API design: endpoints, schemas, status codes, the contract…"
               : "Paste your implementation…"
           }
-          className="w-full rounded-lg border border-border bg-bg-inset p-3 font-mono text-sm outline-none focus:border-accent"
+          className="w-full p-3 font-mono text-sm"
         />
         <textarea
           value={notes}
@@ -165,12 +165,12 @@ export function ChallengeSolve({ challengeId, kind, requirements }: Props) {
           onBlur={save}
           rows={2}
           placeholder="Notes for the reviewer (assumptions, what you'd do with more time)…"
-          className="mt-2 w-full rounded-lg border border-border bg-bg-inset p-2.5 text-sm outline-none focus:border-accent"
+          className="mt-2 w-full p-2.5 text-sm"
         />
         <button
           onClick={evaluate}
           disabled={!code.trim() || evaluating}
-          className="mt-3 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg disabled:opacity-40"
+          className="mt-3 btn btn-primary"
         >
           {evaluating ? "Evaluating…" : "Submit for evaluation"}
         </button>
@@ -178,8 +178,8 @@ export function ChallengeSolve({ challengeId, kind, requirements }: Props) {
       </section>
 
       {analysis && (
-        <section className="rounded-xl border border-border bg-bg-raised p-5">
-          <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-text-faint">
+        <section className="panel p-5">
+          <h2 className="label mb-4">
             Staff-engineer review
           </h2>
           <AnalysisScorecard a={analysis} />
@@ -187,14 +187,14 @@ export function ChallengeSolve({ challengeId, kind, requirements }: Props) {
             <button
               disabled={recording}
               onClick={() => record(true)}
-              className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-bg-inset disabled:opacity-40"
+              className="btn"
             >
               Mark complete
             </button>
             <button
               disabled={recording}
               onClick={() => record(false)}
-              className="rounded-lg border border-border px-4 py-2 text-sm text-text-faint hover:bg-bg-inset disabled:opacity-40"
+              className="btn"
             >
               Keep working
             </button>

@@ -3,10 +3,48 @@
 import { useState } from "react";
 import type { AnalysisResult } from "@/lib/analysis/schema";
 import { AnalysisScorecard } from "@/components/AnalysisScorecard";
+import { RepoImport } from "@/components/RepoImport";
+import { PageHeader } from "@/components/ui";
 
-const LANGS = ["python", "java", "javascript", "go", "typescript", "c++", "rust"];
+const LANGS = ["python", "java", "javascript", "typescript", "go", "c++", "rust"];
 
 export default function AnalyzePage() {
+  const [tab, setTab] = useState<"paste" | "import">("paste");
+
+  return (
+    <div className="space-y-10">
+      <PageHeader
+        kicker="Analyze"
+        title="Analyze code"
+        description="Score a single snippet against what you meant it to do, or import a whole project as a .zip for a staff-engineer repo review."
+      />
+
+      <div
+        role="tablist"
+        aria-label="Analysis mode"
+        className="panel-inset inline-flex gap-1 p-1"
+      >
+        {(["paste", "import"] as const).map((t) => (
+          <button
+            key={t}
+            role="tab"
+            aria-selected={tab === t}
+            onClick={() => setTab(t)}
+            className={`rounded-[7px] px-3.5 py-1.5 text-sm transition-colors ${
+              tab === t ? "bg-bg-raised text-text" : "text-text-dim hover:text-text"
+            }`}
+          >
+            {t === "paste" ? "Paste a snippet" : "Import project (.zip)"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "paste" ? <PasteMode /> : <RepoImport />}
+    </div>
+  );
+}
+
+function PasteMode() {
   const [language, setLanguage] = useState("python");
   const [intent, setIntent] = useState("");
   const [code, setCode] = useState("");
@@ -35,65 +73,55 @@ export default function AnalyzePage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold">Paste &amp; Analyze</h1>
-        <p className="mt-1 text-sm text-text-dim">
-          Any code — an old solution, an interview post-mortem, work code. The
-          analyzer scores it against what you say you were trying to do.
-        </p>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-1.5">
+        {LANGS.map((l) => (
+          <button
+            key={l}
+            onClick={() => setLanguage(l)}
+            className={`rounded-md px-2.5 py-1 text-xs transition-colors ${
+              language === l
+                ? "bg-accent text-accent-ink"
+                : "border border-border text-text-dim hover:text-text"
+            }`}
+          >
+            {l}
+          </button>
+        ))}
       </div>
 
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          {LANGS.map((l) => (
-            <button
-              key={l}
-              onClick={() => setLanguage(l)}
-              className={`rounded-md px-2.5 py-1 text-xs ${
-                language === l
-                  ? "bg-accent text-bg"
-                  : "border border-border text-text-dim"
-              }`}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
-
-        <label className="block">
-          <span className="mb-1 block text-xs text-text-dim">
-            What is this / what were you trying to do? (optional but improves the review)
-          </span>
-          <textarea
-            value={intent}
-            onChange={(e) => setIntent(e.target.value)}
-            rows={3}
-            className="w-full rounded-lg border border-border bg-bg-inset p-2.5 text-sm outline-none focus:border-accent"
-          />
-        </label>
-
+      <label className="block">
+        <span className="mb-1 block text-xs text-text-dim">
+          What is this / what were you trying to do? (optional, improves the review)
+        </span>
         <textarea
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          spellCheck={false}
-          rows={16}
-          placeholder="Paste code here…"
-          className="w-full rounded-lg border border-border bg-bg-inset p-3 font-mono text-sm outline-none focus:border-accent"
+          value={intent}
+          onChange={(e) => setIntent(e.target.value)}
+          rows={3}
+          className="w-full p-2.5 text-sm"
         />
+      </label>
 
-        <button
-          onClick={run}
-          disabled={!code.trim() || loading}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg disabled:opacity-40"
-        >
-          {loading ? "Analyzing…" : "Analyze"}
-        </button>
-        {error && <p className="text-sm text-danger">{error}</p>}
-      </div>
+      <textarea
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        spellCheck={false}
+        rows={16}
+        placeholder="Paste code here…"
+        className="w-full p-3 font-mono text-sm"
+      />
+
+      <button
+        onClick={run}
+        disabled={!code.trim() || loading}
+        className="btn btn-primary"
+      >
+        {loading ? "Analyzing…" : "Analyze"}
+      </button>
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       {analysis && (
-        <div className="border-t border-border pt-8">
+        <div className="panel mt-2 p-5 sm:p-6">
           <AnalysisScorecard a={analysis} />
         </div>
       )}

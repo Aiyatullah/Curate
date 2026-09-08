@@ -36,7 +36,7 @@ export default async function InterviewPage({
         >
           ← Back to solve
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold">
+        <h1 className="display mt-2 text-[length:var(--text-title)]">
           Mock Interview · {problem.title}
         </h1>
         <p className="mt-1 text-sm text-text-dim">

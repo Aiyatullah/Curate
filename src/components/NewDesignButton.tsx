@@ -26,7 +26,7 @@ export function NewDesignButton({ title, prompt }: { title: string; prompt: stri
     <button
       onClick={create}
       disabled={busy}
-      className="w-full rounded-lg border border-border bg-bg-raised px-4 py-3 text-left text-sm text-text transition-colors hover:border-accent/50 disabled:opacity-40"
+      className="panel w-full px-4 py-3 text-left text-sm text-text disabled:opacity-40"
     >
       {title}
       <span className="mt-0.5 block text-xs text-text-faint">{prompt.slice(0, 80)}…</span>

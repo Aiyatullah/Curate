@@ -3,6 +3,7 @@ import { db } from "@/lib/db/client";
 import { knowledgeGraph, problems } from "@/lib/db/schema";
 import { asc } from "drizzle-orm";
 import { TRACK } from "@/lib/progression/track";
+import { PageHeader } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -25,18 +26,21 @@ export default async function GraphPage() {
   const rowByTopic = new Map(graph.map((g) => [g.topic, g]));
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold">Knowledge Graph</h1>
-        <p className="mt-1 text-sm text-text-dim">
-          Per-topic progress. <span className="text-text">Readiness</span> is the
-          mean AI interview-readiness score across your analysed attempts — that&apos;s
-          where your first-thought and pasted code feed back into the graph.
-          Confidence combines solved count, accuracy and readiness.
-        </p>
-      </div>
+    <div className="space-y-10">
+      <PageHeader
+        kicker="Progress"
+        title="Knowledge graph"
+        description={
+          <>
+            Per-topic progress. <span className="text-text">Readiness</span> is the
+            mean AI interview-readiness across your analysed attempts — where your
+            first-thought and pasted code feed back into the graph. Confidence
+            combines solved count, accuracy and readiness.
+          </>
+        }
+      />
 
-      <div className="overflow-x-auto">
+      <div className="panel overflow-x-auto px-4 py-1">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left font-mono text-[10px] uppercase tracking-widest text-text-faint">

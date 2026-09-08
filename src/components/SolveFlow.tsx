@@ -162,7 +162,7 @@ export function SolveFlow({ problem }: Props) {
   return (
     <div className="space-y-4">
       {attemptNumber != null && attemptNumber > 1 && (
-        <p className="rounded-lg border border-accent-warm/40 bg-bg-raised px-3 py-2 text-xs text-accent-warm">
+        <p className="panel-inset px-3 py-2 text-xs text-accent-warm">
           Attempt #{attemptNumber} — your earlier attempts on this problem are kept.
         </p>
       )}
@@ -173,9 +173,9 @@ export function SolveFlow({ problem }: Props) {
           href={problem.leetcodeUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-block rounded-md border border-border px-3 py-1.5 text-sm text-accent hover:bg-bg-raised"
+          className="btn btn-sm inline-flex text-accent"
         >
-          Open problem on LeetCode ↗
+          Open on LeetCode ↗
         </a>
         <Field
           label="First thought — what jumps out?"
@@ -206,7 +206,7 @@ export function SolveFlow({ problem }: Props) {
               save();
             }}
             disabled={!firstThought.trim() || !bruteForceBigO.trim()}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg disabled:opacity-40"
+            className="btn btn-primary"
           >
             Start timer &amp; open workspace
           </button>
@@ -223,10 +223,10 @@ export function SolveFlow({ problem }: Props) {
               <button
                 key={l}
                 onClick={() => setLanguage(l)}
-                className={`rounded-md px-2.5 py-1 text-xs ${
+                className={`rounded-md px-2.5 py-1 text-xs transition-colors ${
                   language === l
-                    ? "bg-accent text-bg"
-                    : "border border-border text-text-dim"
+                    ? "bg-accent text-accent-ink"
+                    : "border border-border text-text-dim hover:text-text"
                 }`}
               >
                 {l}
@@ -273,7 +273,7 @@ export function SolveFlow({ problem }: Props) {
           <button
             onClick={runAnalysis}
             disabled={!code.trim() || analyzing}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg disabled:opacity-40"
+            className="btn btn-primary"
           >
             {analyzing ? "Analyzing…" : "Submit for analysis"}
           </button>
@@ -300,7 +300,7 @@ export function SolveFlow({ problem }: Props) {
                 key={r}
                 disabled={recording}
                 onClick={() => record(r, true)}
-                className="rounded-lg border border-border px-4 py-2 text-sm capitalize hover:bg-bg-raised disabled:opacity-40"
+                className="btn btn-sm capitalize"
               >
                 Solved · {r}
               </button>
@@ -317,7 +317,7 @@ export function SolveFlow({ problem }: Props) {
             <button
               disabled={recording}
               onClick={() => record("hard", false, true)}
-              className="rounded-lg border border-border px-4 py-2 text-sm text-text-faint hover:bg-bg-raised disabled:opacity-40"
+              className="btn btn-sm"
             >
               Didn&apos;t solve — flag to revise
             </button>
@@ -351,13 +351,12 @@ function Stage({
   children: React.ReactNode;
 }) {
   return (
-    <section
-      className={`rounded-xl border border-border p-5 ${
-        open ? "bg-bg-raised" : "bg-bg-inset opacity-60"
-      }`}
-    >
-      <p className="mb-4 font-mono text-xs uppercase tracking-widest text-text-faint">
-        Stage {n} · {title}
+    <section className={`panel p-5 sm:p-6 ${open ? "" : "opacity-60"}`}>
+      <p className="label mb-4 flex items-center gap-2">
+        <span className="grid h-5 w-5 place-items-center rounded-full border border-border text-[10px] text-text-dim">
+          {n}
+        </span>
+        {title}
       </p>
       <div className="space-y-3">{children}</div>
     </section>

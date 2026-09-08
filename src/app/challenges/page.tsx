@@ -2,6 +2,7 @@ import Link from "next/link";
 import { asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { challenges, challengeSessions } from "@/lib/db/schema";
+import { PageHeader } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -40,25 +41,20 @@ export default async function ChallengesPage() {
   const solvedCount = done.filter((d) => d.solved).length;
 
   return (
-    <div className="space-y-8">
-      <header>
-        <h1 className="text-2xl font-semibold">Engineering Challenges</h1>
-        <p className="mt-1 text-sm text-text-dim">
-          {rows.length} challenges · {solvedCount} complete. Not LeetCode — build
-          a component, a backend service, or an API design, then get a
-          staff-engineer review against the requirements.
-        </p>
-      </header>
+    <div className="space-y-10">
+      <PageHeader
+        kicker="Engineering Interview OS"
+        title="Challenges"
+        description={`${rows.length} challenges · ${solvedCount} complete. Not LeetCode — build a component, a backend service, or an API design, then get a staff-engineer review against the requirements.`}
+      />
 
       {["frontend", "backend", "api-design"].map((kind) => {
         const list = byKind.get(kind) ?? [];
         if (!list.length) return null;
         return (
           <section key={kind}>
-            <h2 className="mb-2 font-mono text-xs uppercase tracking-widest text-text-faint">
-              {KIND_LABEL[kind] ?? kind}
-            </h2>
-            <ul className="divide-y divide-border rounded-lg border border-border">
+            <h2 className="label mb-2">{KIND_LABEL[kind] ?? kind}</h2>
+            <ul className="panel divide-y divide-border overflow-hidden">
               {list.map((c) => {
                 const s = stat.get(c.id);
                 return (

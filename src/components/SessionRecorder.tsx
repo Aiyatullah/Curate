@@ -102,14 +102,14 @@ export function SessionRecorder({ label = "Record this session" }: { label?: str
 
   if (!mounted) {
     return (
-      <div className="rounded-xl border border-border bg-bg-raised p-4 text-xs text-text-faint">
+      <div className="panel p-4 text-xs text-text-faint">
         {label}…
       </div>
     );
   }
   if (!supported) {
     return (
-      <div className="rounded-xl border border-border bg-bg-raised p-4 text-xs text-text-faint">
+      <div className="panel p-4 text-xs text-text-faint">
         Recording needs a Chromium browser with camera/screen permissions.
       </div>
     );
@@ -120,9 +120,9 @@ export function SessionRecorder({ label = "Record this session" }: { label?: str
   ).padStart(2, "0")}`;
 
   return (
-    <div className="space-y-3 rounded-xl border border-border bg-bg-raised p-4">
+    <div className="space-y-3 panel p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-xs uppercase tracking-widest text-text-faint">
+        <span className="label">
           {label}
         </span>
         {active ? (
@@ -133,7 +133,7 @@ export function SessionRecorder({ label = "Record this session" }: { label?: str
             </span>
             <button
               onClick={stop}
-              className="rounded-md border border-danger px-3 py-1 text-xs text-danger"
+              className="btn btn-sm text-danger"
             >
               Stop
             </button>
@@ -142,13 +142,13 @@ export function SessionRecorder({ label = "Record this session" }: { label?: str
           <>
             <button
               onClick={() => start("camera")}
-              className="rounded-md border border-border px-3 py-1 text-xs text-text-dim hover:text-text"
+              className="btn btn-sm"
             >
               🎥 Camera + mic
             </button>
             <button
               onClick={() => start("screen")}
-              className="rounded-md border border-border px-3 py-1 text-xs text-text-dim hover:text-text"
+              className="btn btn-sm"
             >
               🖥 Screen + mic
             </button>

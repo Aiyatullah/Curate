@@ -69,14 +69,14 @@ export function ResumeTracker({ initial }: { initial: ResumeItem[] }) {
 
       <form
         onSubmit={add}
-        className="grid gap-2 rounded-xl border border-border bg-bg-raised p-4 sm:grid-cols-[130px_1fr]"
+        className="grid gap-2 panel p-4 sm:grid-cols-[130px_1fr]"
       >
         <label className="text-xs text-text-dim">
           <span className="mb-1 block">Type</span>
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value)}
-            className="w-full rounded-md border border-border bg-bg-inset px-2 py-1.5 text-sm text-text"
+            className="w-full px-2 py-1.5 text-sm"
           >
             {KINDS.map((k) => (
               <option key={k.v} value={k.v}>
@@ -91,7 +91,7 @@ export function ResumeTracker({ initial }: { initial: ResumeItem[] }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="w-full rounded-md border border-border bg-bg-inset px-2 py-1.5 text-sm text-text"
+            className="w-full px-2 py-1.5 text-sm"
           />
         </label>
         <label className="text-xs text-text-dim sm:col-start-2">
@@ -99,7 +99,7 @@ export function ResumeTracker({ initial }: { initial: ResumeItem[] }) {
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            className="w-full rounded-md border border-border bg-bg-inset px-2 py-1.5 text-sm text-text"
+            className="w-full px-2 py-1.5 text-sm"
           />
         </label>
         <label className="text-xs text-text-dim">
@@ -108,7 +108,7 @@ export function ResumeTracker({ initial }: { initial: ResumeItem[] }) {
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             placeholder="shipped / applied / interviewing…"
-            className="w-full rounded-md border border-border bg-bg-inset px-2 py-1.5 text-sm text-text"
+            className="w-full px-2 py-1.5 text-sm"
           />
         </label>
         <label className="text-xs text-text-dim">
@@ -116,20 +116,20 @@ export function ResumeTracker({ initial }: { initial: ResumeItem[] }) {
           <input
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            className="w-full rounded-md border border-border bg-bg-inset px-2 py-1.5 text-sm text-text"
+            className="w-full px-2 py-1.5 text-sm"
           />
         </label>
         <button
           type="submit"
           disabled={busy || !title.trim()}
-          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-bg disabled:opacity-40 sm:col-start-2 sm:justify-self-start"
+          className="btn btn-primary btn-sm sm:col-start-2 sm:justify-self-start"
         >
           Add
         </button>
       </form>
 
       {items.length > 0 && (
-        <ul className="divide-y divide-border rounded-lg border border-border">
+        <ul className="panel divide-y divide-border overflow-hidden">
           {items.map((i) => (
             <li key={i.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
               <span className="w-20 shrink-0 font-mono text-[10px] uppercase text-text-faint">

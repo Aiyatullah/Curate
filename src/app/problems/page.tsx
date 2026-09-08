@@ -4,6 +4,7 @@ import { problems, problemStatus } from "@/lib/db/schema";
 import type { ProblemStatusValue } from "@/lib/db/schema";
 import { TRACK } from "@/lib/progression/track";
 import { ProblemRow } from "@/components/ProblemRow";
+import { PageHeader } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -30,14 +31,12 @@ export default async function ProblemsPage() {
   const solved = rows.filter((r) => r.problem_status?.status === "solved").length;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold">Problem Bank</h1>
-        <p className="mt-1 text-sm text-text-dim">
-          {rows.length} problems · {solved} solved · grouped by track topic. Tick
-          the box to mark solved, or flag a problem to revise.
-        </p>
-      </div>
+    <div className="space-y-10">
+      <PageHeader
+        kicker="Problem bank"
+        title="Problems"
+        description={`${rows.length} problems · ${solved} solved · grouped by track topic. Tick the box to mark solved, or flag a problem to revise.`}
+      />
 
       {orderedTopics.map((topic) => {
         const list = byTopic.get(topic)!;
@@ -45,14 +44,14 @@ export default async function ProblemsPage() {
           (r) => r.problem_status?.status === "solved",
         ).length;
         return (
-          <section key={topic} id={topic}>
-            <h2 className="mb-2 flex items-baseline justify-between font-mono text-xs uppercase tracking-widest text-text-faint">
+          <section key={topic} id={topic} className="scroll-mt-24">
+            <h2 className="label mb-2 flex items-baseline justify-between">
               <span>{topic}</span>
               <span>
                 {done}/{list.length}
               </span>
             </h2>
-            <ul className="divide-y divide-border rounded-lg border border-border">
+            <ul className="panel divide-y divide-border overflow-hidden">
               {list.map((r) => {
                 const lists: string[] = [];
                 if (r.problems.inBlind75) lists.push("Blind75");

@@ -35,8 +35,8 @@ export function InterviewScorecard({ s }: { s: InterviewScore }) {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {(Object.keys(s.scores) as (keyof InterviewScore["scores"])[]).map((k) => (
-          <div key={k} className="rounded-xl border border-border bg-bg-inset p-4">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-text-faint">
+          <div key={k} className="panel-inset p-4">
+            <p className="label">
               {LABELS[k]}
             </p>
             <p className="mt-1 text-2xl font-semibold">
@@ -53,7 +53,7 @@ export function InterviewScorecard({ s }: { s: InterviewScore }) {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div>
-          <h3 className="mb-2 font-mono text-xs uppercase tracking-widest text-text-faint">
+          <h3 className="label mb-2">
             Green flags
           </h3>
           {s.greenFlags.length ? (
@@ -70,7 +70,7 @@ export function InterviewScorecard({ s }: { s: InterviewScore }) {
           )}
         </div>
         <div>
-          <h3 className="mb-2 font-mono text-xs uppercase tracking-widest text-text-faint">
+          <h3 className="label mb-2">
             Red flags
           </h3>
           {s.redFlags.length ? (

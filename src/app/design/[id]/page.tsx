@@ -28,7 +28,7 @@ export default async function DesignPage({
         <Link href="/design" className="text-xs text-text-faint hover:text-text-dim">
           ← Studio
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold">{d.prompt}</h1>
+        <h1 className="display mt-2 text-[length:var(--text-title)]">{d.prompt}</h1>
       </div>
       <DesignStudio
         prompt={d.prompt}

@@ -96,9 +96,9 @@ export function DesignStudio({ prompt, designId, initial, initialReview }: Props
       </div>
 
       {SECTIONS.map((s) => (
-        <section key={s.key} className="rounded-xl border border-border bg-bg-raised p-5">
+        <section key={s.key} className="panel p-5">
           <label className="block">
-            <span className="font-mono text-xs uppercase tracking-widest text-text-faint">
+            <span className="label">
               {s.label}
             </span>
             <span className="mt-1 mb-2 block text-xs text-text-faint">{s.hint}</span>
@@ -107,7 +107,7 @@ export function DesignStudio({ prompt, designId, initial, initialReview }: Props
               onChange={(e) => setState((st) => ({ ...st, [s.key]: e.target.value }))}
               onBlur={save}
               rows={5}
-              className="w-full rounded-lg border border-border bg-bg-inset p-3 text-sm outline-none focus:border-accent"
+              className="w-full p-3 text-sm"
             />
           </label>
         </section>
@@ -117,7 +117,7 @@ export function DesignStudio({ prompt, designId, initial, initialReview }: Props
         <button
           onClick={runReview}
           disabled={busy || filledCount < 2}
-          className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-bg disabled:opacity-40"
+          className="btn btn-primary"
         >
           {busy ? "Reviewing…" : "Submit for review"}
         </button>
@@ -128,7 +128,7 @@ export function DesignStudio({ prompt, designId, initial, initialReview }: Props
       </div>
 
       {review && (
-        <section className="rounded-xl border border-border bg-bg-raised p-5">
+        <section className="panel p-5">
           <div className="mb-4 flex items-center gap-3">
             <span className="text-3xl font-semibold">{review.overall}/10</span>
             <span className="text-sm text-text-dim">{review.verdict}</span>
@@ -136,7 +136,7 @@ export function DesignStudio({ prompt, designId, initial, initialReview }: Props
           <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {Object.entries(review.scores).map(([k, v]) => (
               <div key={k} className="rounded-lg border border-border bg-bg-inset p-3">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-text-faint">
+                <p className="label">
                   {k}
                 </p>
                 <p className="mt-0.5 text-xl font-semibold">
@@ -170,7 +170,7 @@ function ReviewList({
     tone === "good" ? "text-accent" : tone === "bad" ? "text-danger" : "text-accent-warm";
   return (
     <div className="mb-4">
-      <h3 className="mb-2 font-mono text-xs uppercase tracking-widest text-text-faint">
+      <h3 className="label mb-2">
         {title}
       </h3>
       <ul className="space-y-1 text-sm text-text-dim">

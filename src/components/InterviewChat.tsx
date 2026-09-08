@@ -94,7 +94,7 @@ export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Prop
 
   if (!started) {
     return (
-      <div className="space-y-4 rounded-xl border border-border bg-bg-raised p-6">
+      <div className="space-y-4 panel p-6">
         <p className="text-sm text-text-dim">
           A senior engineer will debrief you on <strong>{problemTitle}</strong> —
           up to ~6 questions probing your approach, complexity analysis, tradeoffs
@@ -110,7 +110,7 @@ export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Prop
         <button
           onClick={start}
           disabled={busy}
-          className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-bg disabled:opacity-40"
+          className="btn btn-primary"
         >
           {busy ? "Starting…" : "Start mock interview →"}
         </button>
@@ -123,7 +123,7 @@ export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Prop
     <div className="space-y-4">
       <div
         ref={scrollRef}
-        className="max-h-[52vh] space-y-3 overflow-y-auto rounded-xl border border-border bg-bg-raised p-4"
+        className="max-h-[52vh] space-y-3 overflow-y-auto panel p-4"
       >
         {transcript.map((e, i) => (
           <div
@@ -137,7 +137,7 @@ export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Prop
                   : "bg-accent/15 text-text"
               }`}
             >
-              <span className="mb-0.5 block font-mono text-[10px] uppercase tracking-widest text-text-faint">
+              <span className="mb-0.5 block label">
                 {e.role}
               </span>
               {e.text}
@@ -154,13 +154,13 @@ export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Prop
             onChange={(e) => setDraft(e.target.value)}
             rows={3}
             placeholder="Type your answer, or use the mic…"
-            className="w-full rounded-lg border border-border bg-bg-inset p-3 text-sm outline-none focus:border-accent"
+            className="w-full p-3 text-sm"
           />
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => send(false)}
               disabled={busy || !draft.trim()}
-              className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg disabled:opacity-40"
+              className="btn btn-primary"
             >
               Send
             </button>
@@ -180,7 +180,7 @@ export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Prop
             <button
               onClick={() => send(true)}
               disabled={busy}
-              className="ml-auto rounded-lg border border-border px-4 py-2 text-sm text-text-faint hover:bg-bg-raised disabled:opacity-40"
+              className="ml-auto btn"
             >
               End &amp; grade
             </button>
@@ -195,8 +195,8 @@ export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Prop
       )}
 
       {score && (
-        <div className="rounded-xl border border-border bg-bg-raised p-5">
-          <p className="mb-4 font-mono text-xs uppercase tracking-widest text-text-faint">
+        <div className="panel p-5">
+          <p className="label mb-4">
             Interview scorecard
           </p>
           <InterviewScorecard s={score} />

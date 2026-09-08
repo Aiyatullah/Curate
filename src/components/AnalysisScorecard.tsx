@@ -14,8 +14,8 @@ export function AnalysisScorecard({ a }: { a: AnalysisResult }) {
         {(
           Object.keys(a.scores) as (keyof AnalysisResult["scores"])[]
         ).map((k) => (
-          <div key={k} className="rounded-xl border border-border bg-bg-inset p-4">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-text-faint">
+          <div key={k} className="panel-inset p-4">
+            <p className="label">
               {SCORE_LABELS[k]}
             </p>
             <p className="mt-1 text-2xl font-semibold">
@@ -96,7 +96,7 @@ export function AnalysisScorecard({ a }: { a: AnalysisResult }) {
 function Row({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="mb-2 font-mono text-xs uppercase tracking-widest text-text-faint">
+      <h3 className="label mb-2">
         {title}
       </h3>
       {children}
