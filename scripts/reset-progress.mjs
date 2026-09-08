@@ -3,6 +3,7 @@
 import postgres from "postgres";
 
 const sql = postgres(process.env.DATABASE_URL, { prepare: false });
+await sql`delete from interview_sessions`;
 await sql`delete from solve_sessions`;
 await sql`delete from analysis_sessions`;
 await sql`delete from knowledge_graph`;

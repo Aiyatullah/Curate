@@ -40,9 +40,25 @@ Config lives in `.env.local`:
 |---|---|
 | `/` | Dashboard — streak, today's problem, track progress, recent attempts |
 | `/practice/[problemId]` | 4-stage solve flow (Understand → Solve → Analysis → Record); shows "Attempt #N" on re-attempts |
+| `/interview/[problemId]` | **Phase 2** — mock interview: AI plays interviewer, up to ~6 adaptive questions on your code + reasoning, voice or text input, then an interview scorecard |
 | `/analyze` | Standalone "paste any code & analyze" |
 | `/problems` | Question bank grouped by track topic |
-| `/graph` | Per-topic knowledge graph (solved / attempts / accuracy / confidence) |
+| `/graph` | Per-topic knowledge graph (solved / accuracy / AI readiness / interview score / revise / confidence) |
+
+## Phase 2 — Interview Thinking OS
+
+`/interview/[problemId]` (also linked from Stage 4 of a solve and the dashboard).
+
+- The AI interviewer opens with "walk me through your approach", then asks up to
+  6 adaptive follow-ups probing complexity, tradeoffs and edge cases — it has
+  your latest submitted code + journal for that problem.
+- Answer by **typing or speaking** (browser Web Speech API — Chrome/Edge; typing
+  works everywhere, no Whisper/server needed).
+- "End & grade" (or the interviewer wrapping up) produces an **interview
+  scorecard**: communication / clarity / tradeoff discussion / complexity
+  explanation, an overall score, a hire verdict, and green/red flags.
+- Scores roll into the knowledge graph as a per-topic `Interview` column.
+- Stored in `interview_sessions` (transcript + score jsonb).
 
 ## Question bank
 

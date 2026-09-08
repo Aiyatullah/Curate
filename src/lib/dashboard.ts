@@ -1,6 +1,12 @@
 import { sql, eq, desc } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { solveSessions, knowledgeGraph, problems, problemStatus } from "@/lib/db/schema";
+import {
+  solveSessions,
+  knowledgeGraph,
+  problems,
+  problemStatus,
+  interviewSessions,
+} from "@/lib/db/schema";
 import { getAppState } from "@/lib/streak";
 import { getWeakAreas } from "@/lib/knowledge/update";
 import { recommendNext } from "@/lib/progression/recommend";
@@ -34,6 +40,18 @@ export async function getDashboard() {
         .where(eq(problemStatus.status, "revise")),
     ]);
 
+  const interviews = await db
+    .select({
+      id: interviewSessions.id,
+      problemId: interviewSessions.problemId,
+      score: interviewSessions.score,
+      createdAt: interviewSessions.createdAt,
+    })
+    .from(interviewSessions)
+    .where(sql`${interviewSessions.score} is not null`)
+    .orderBy(desc(interviewSessions.createdAt))
+    .limit(4);
+
   return {
     state,
     problemsSolved: Number(solvedRow[0]?.n ?? 0),
@@ -41,6 +59,7 @@ export async function getDashboard() {
     reviseCount: Number(reviseRow[0]?.n ?? 0),
     streakDays: state.streakDays,
     recent,
+    interviews,
     weakAreas,
     recommendation,
     graph,

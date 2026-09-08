@@ -5,6 +5,7 @@ import {
   solveSessions,
   knowledgeGraph,
   problemStatus,
+  interviewSessions,
 } from "@/lib/db/schema";
 
 /**
@@ -66,6 +67,21 @@ export async function recomputeTopic(topic: string): Promise<void> {
     .where(sql`${problems.topic} = ${topic} and ${problemStatus.status} = 'revise'`);
   const reviseCount = Number(reviseRow?.n ?? 0);
 
+  const interviews = await db
+    .select({ score: interviewSessions.score })
+    .from(interviewSessions)
+    .innerJoin(problems, eq(problems.id, interviewSessions.problemId))
+    .where(eq(problems.topic, topic));
+  const interviewOveralls = interviews
+    .map((r) => r.score?.overall)
+    .filter((n): n is number => typeof n === "number");
+  const avgInterviewScore =
+    interviewOveralls.length === 0
+      ? null
+      : Math.round(
+          interviewOveralls.reduce((a, b) => a + b, 0) / interviewOveralls.length,
+        );
+
   const confidence = deriveConfidence(solvedCount, accuracyPct, avgReadiness);
 
   const values = {
@@ -74,6 +90,7 @@ export async function recomputeTopic(topic: string): Promise<void> {
     attemptCount,
     accuracyPct,
     avgReadiness: avgReadiness === null ? null : Math.round(avgReadiness),
+    avgInterviewScore,
     reviseCount,
     confidence,
     lastPracticedAt,

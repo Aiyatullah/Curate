@@ -67,8 +67,16 @@ export default async function DashboardPage() {
             </Link>
           </p>
         )}
-        <div className="mt-4 border-t border-border pt-4">
+        <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-border pt-4">
           <FindMoreButton />
+          {rec.problem && (
+            <Link
+              href={`/interview/${rec.problem.id}`}
+              className="text-sm text-text-dim hover:text-text"
+            >
+              🎙 Mock interview on this →
+            </Link>
+          )}
         </div>
       </section>
 
@@ -111,6 +119,41 @@ export default async function DashboardPage() {
         </div>
 
         <div>
+          <h3 className="mb-3 font-mono text-xs uppercase tracking-widest text-text-faint">
+            Recent mock interviews
+          </h3>
+          {d.interviews.length ? (
+            <ul className="mb-6 space-y-2 text-sm">
+              {d.interviews.map((iv) => (
+                <li
+                  key={iv.id}
+                  className="flex items-center justify-between rounded-lg border border-border px-3 py-2"
+                >
+                  <span className="text-text-dim">{iv.problemId ?? "freeform"}</span>
+                  <span className="font-mono text-xs">
+                    {iv.score ? (
+                      <span
+                        className={
+                          iv.score.hireVerdict.includes("yes")
+                            ? "text-accent"
+                            : "text-text-faint"
+                        }
+                      >
+                        {iv.score.overall}/10 · {iv.score.hireVerdict}
+                      </span>
+                    ) : (
+                      "—"
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mb-6 text-sm text-text-faint">
+              No mock interviews yet. Solve a problem, then hit “Mock interview”.
+            </p>
+          )}
+
           <h3 className="mb-3 font-mono text-xs uppercase tracking-widest text-text-faint">
             Recent attempts
           </h3>

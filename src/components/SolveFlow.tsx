@@ -322,9 +322,17 @@ export function SolveFlow({ problem }: Props) {
               Didn&apos;t solve — flag to revise
             </button>
           </div>
-          <Link href="/" className="text-xs text-text-faint">
-            Skip &amp; go to dashboard
-          </Link>
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <Link
+              href={`/interview/${problem.id}`}
+              className="text-xs text-accent"
+            >
+              Do a mock interview on this →
+            </Link>
+            <Link href="/" className="text-xs text-text-faint">
+              Skip &amp; go to dashboard
+            </Link>
+          </div>
         </Stage>
       )}
     </div>

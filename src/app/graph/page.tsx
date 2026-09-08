@@ -45,6 +45,7 @@ export default async function GraphPage() {
               <th className="py-2 pr-4">Attempts</th>
               <th className="py-2 pr-4">Accuracy</th>
               <th className="py-2 pr-4">Readiness</th>
+              <th className="py-2 pr-4">Interview</th>
               <th className="py-2 pr-4">Revise</th>
               <th className="py-2 pr-4">Confidence</th>
               <th className="py-2">In bank</th>
@@ -78,6 +79,11 @@ export default async function GraphPage() {
                   </td>
                   <td className="py-2.5 pr-4 text-text-dim">
                     {r?.avgReadiness != null ? `${r.avgReadiness}/10` : "—"}
+                  </td>
+                  <td className="py-2.5 pr-4 text-text-dim">
+                    {r?.avgInterviewScore != null
+                      ? `${r.avgInterviewScore}/10`
+                      : "—"}
                   </td>
                   <td className="py-2.5 pr-4 text-accent-warm">
                     {r?.reviseCount ? r.reviseCount : "—"}

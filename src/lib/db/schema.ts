@@ -9,6 +9,7 @@ import {
   serial,
 } from "drizzle-orm/pg-core";
 import type { AnalysisResult } from "@/lib/analysis/schema";
+import type { InterviewScore } from "@/lib/interview/schema";
 
 /**
  * Phase 1 schema. Single-user (no auth). Designed to extend into later phases
@@ -81,6 +82,24 @@ export const solveSessions = pgTable("solve_sessions", {
   attemptNumber: integer("attempt_number").notNull().default(1),
 });
 
+/**
+ * Phase 2 — Interview Thinking OS. One row per mock-interview session. The AI
+ * plays the interviewer; the transcript is the full back-and-forth; `score` is
+ * filled in when the session is graded.
+ */
+export const interviewSessions = pgTable("interview_sessions", {
+  id: serial("id").primaryKey(),
+  problemId: text("problem_id").references(() => problems.id), // nullable: freeform interviews allowed
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  transcript: jsonb("transcript")
+    .$type<{ role: "interviewer" | "candidate"; text: string }[]>()
+    .notNull()
+    .default([]),
+  score: jsonb("score").$type<InterviewScore | null>(),
+  feedback: text("feedback"),
+  durationSec: integer("duration_sec").default(0),
+});
+
 // Standalone "paste code & analyze" runs — no problem attached.
 export const analysisSessions = pgTable("analysis_sessions", {
   id: serial("id").primaryKey(),
@@ -98,6 +117,7 @@ export const knowledgeGraph = pgTable("knowledge_graph", {
   attemptCount: integer("attempt_count").notNull().default(0),
   accuracyPct: integer("accuracy_pct").notNull().default(0),
   avgReadiness: integer("avg_readiness"), // mean interviewReadiness across analysed attempts
+  avgInterviewScore: integer("avg_interview_score"), // mean mock-interview overall for this topic
   reviseCount: integer("revise_count").notNull().default(0), // problems flagged "revise" in this topic
   confidence: text("confidence").notNull().default("low"), // "low" | "medium" | "high"
   lastPracticedAt: timestamp("last_practiced_at", { withTimezone: true }),
@@ -117,5 +137,6 @@ export type SolveSession = typeof solveSessions.$inferSelect;
 export type KnowledgeRow = typeof knowledgeGraph.$inferSelect;
 export type AppState = typeof appState.$inferSelect;
 export type ProblemStatus = typeof problemStatus.$inferSelect;
+export type InterviewSession = typeof interviewSessions.$inferSelect;
 
 export type ProblemStatusValue = "unsolved" | "solved" | "revise";
