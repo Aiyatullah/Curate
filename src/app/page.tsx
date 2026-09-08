@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getDashboard } from "@/lib/dashboard";
 import { TRACK } from "@/lib/progression/track";
 import { FindMoreButton } from "@/components/FindMoreButton";
+import { MentorBrief } from "@/components/MentorBrief";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,8 @@ export default async function DashboardPage() {
           {d.state.currentPhase} · {rec.topic}
         </h1>
       </section>
+
+      <MentorBrief />
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat

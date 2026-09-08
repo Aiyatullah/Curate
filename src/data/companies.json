@@ -1,0 +1,9 @@
+[
+  { "slug": "stripe", "name": "Stripe", "tags": ["payments", "api", "infra"], "focusAreas": ["Hash Maps", "Intervals", "Strings", "Two Pointers"], "priority": 1 },
+  { "slug": "vercel", "name": "Vercel", "tags": ["frontend", "infra", "dx"], "focusAreas": ["Arrays", "Trees", "Strings", "Dynamic Programming"], "priority": 1 },
+  { "slug": "linear", "name": "Linear", "tags": ["product", "frontend"], "focusAreas": ["Arrays", "Graphs", "Trees"], "priority": 2 },
+  { "slug": "supabase", "name": "Supabase", "tags": ["backend", "database", "oss"], "focusAreas": ["Binary Search", "Graphs", "Dynamic Programming"], "priority": 2 },
+  { "slug": "cloudflare", "name": "Cloudflare", "tags": ["infra", "networking", "systems"], "focusAreas": ["Graphs", "Heap / Priority Queue", "Math & Bit Manipulation"], "priority": 2 },
+  { "slug": "cursor", "name": "Cursor (Anysphere)", "tags": ["ai", "devtools"], "focusAreas": ["Dynamic Programming", "Trees", "Backtracking", "Graphs"], "priority": 1 },
+  { "slug": "openai", "name": "OpenAI", "tags": ["ai", "research", "infra"], "focusAreas": ["Dynamic Programming", "Graphs", "Heap / Priority Queue", "Advanced Algorithms"], "priority": 1 }
+]

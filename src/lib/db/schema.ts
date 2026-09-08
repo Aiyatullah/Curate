@@ -10,6 +10,8 @@ import {
 } from "drizzle-orm/pg-core";
 import type { AnalysisResult } from "@/lib/analysis/schema";
 import type { InterviewScore } from "@/lib/interview/schema";
+import type { SystemDesignReview } from "@/lib/systemdesign/schema";
+import type { MentorBrief } from "@/lib/mentor/schema";
 
 /**
  * Phase 1 schema. Single-user (no auth). Designed to extend into later phases
@@ -123,6 +125,90 @@ export const knowledgeGraph = pgTable("knowledge_graph", {
   lastPracticedAt: timestamp("last_practiced_at", { withTimezone: true }),
 });
 
+/* ─────────────────────────  Phase 3 — Engineering Interview OS  ───────────────────────── */
+
+// Non-DSA challenges: build-a-component, design-a-system-lite, API design.
+export const challenges = pgTable("challenges", {
+  id: text("id").primaryKey(),
+  kind: text("kind").notNull(), // "frontend" | "backend" | "api-design"
+  title: text("title").notNull(),
+  difficulty: text("difficulty").notNull(), // "Easy" | "Medium" | "Hard"
+  prompt: text("prompt").notNull(), // the full task statement (markdown)
+  requirements: text("requirements").array().$type<string[]>().default([]),
+  evalRubric: text("eval_rubric"), // what a strong answer covers — fed to the evaluator
+  companyTags: text("company_tags").array().$type<string[]>().default([]),
+  referenceUrl: text("reference_url"),
+  trackOrder: integer("track_order").notNull().default(0),
+  source: text("source").notNull().default("seed"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const challengeSessions = pgTable("challenge_sessions", {
+  id: serial("id").primaryKey(),
+  challengeId: text("challenge_id")
+    .notNull()
+    .references(() => challenges.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  language: text("language").notNull().default("typescript"),
+  approach: text("approach"), // written plan before coding
+  code: text("code"),
+  notes: text("notes"),
+  analysis: jsonb("analysis").$type<AnalysisResult | null>(),
+  solved: boolean("solved").default(false),
+  attemptNumber: integer("attempt_number").notNull().default(1),
+});
+
+/* ─────────────────────────  Phase 4 — System Design OS  ───────────────────────── */
+
+export const systemDesigns = pgTable("system_designs", {
+  id: serial("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  prompt: text("prompt").notNull(), // "Design WhatsApp"
+  requirements: text("requirements"), // functional + non-functional
+  scaleEstimates: text("scale_estimates"), // QPS, storage, bandwidth
+  dataModel: text("data_model"),
+  apiDesign: text("api_design"),
+  highLevelDesign: text("high_level_design"),
+  deepDives: text("deep_dives"), // caching, sharding, queues, etc.
+  tradeoffs: text("tradeoffs"),
+  review: jsonb("review").$type<SystemDesignReview | null>(),
+  score: integer("score"),
+});
+
+/* ─────────────────────────  Phase 5 — Career OS  ───────────────────────── */
+
+export const companies = pgTable("companies", {
+  slug: text("slug").primaryKey(), // "stripe"
+  name: text("name").notNull(),
+  tags: text("tags").array().$type<string[]>().default([]), // "payments", "infra"
+  focusAreas: text("focus_areas").array().$type<string[]>().default([]), // topics they lean on
+  notes: text("notes"),
+  targetDate: date("target_date"),
+  priority: integer("priority").notNull().default(3), // 1 = highest
+  archived: boolean("archived").notNull().default(false),
+});
+
+export const resumeItems = pgTable("resume_items", {
+  id: serial("id").primaryKey(),
+  kind: text("kind").notNull(), // "project" | "oss" | "blog" | "application" | "referral"
+  title: text("title").notNull(),
+  url: text("url"),
+  status: text("status"), // free text: "shipped", "applied", "interviewing", "rejected", "offer"
+  company: text("company"), // for applications/referrals
+  notes: text("notes"),
+  happenedOn: date("happened_on"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+/* ─────────────────────────  Phase 6 — AI Mentor  ───────────────────────── */
+
+export const mentorBriefs = pgTable("mentor_briefs", {
+  id: serial("id").primaryKey(),
+  forDate: date("for_date").notNull().unique(), // one brief per day
+  brief: jsonb("brief").$type<MentorBrief | null>(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
 // Single denormalized row (id = 1) backing the dashboard header.
 export const appState = pgTable("app_state", {
   id: integer("id").primaryKey().default(1),
@@ -138,5 +224,11 @@ export type KnowledgeRow = typeof knowledgeGraph.$inferSelect;
 export type AppState = typeof appState.$inferSelect;
 export type ProblemStatus = typeof problemStatus.$inferSelect;
 export type InterviewSession = typeof interviewSessions.$inferSelect;
+export type Challenge = typeof challenges.$inferSelect;
+export type ChallengeSession = typeof challengeSessions.$inferSelect;
+export type SystemDesign = typeof systemDesigns.$inferSelect;
+export type Company = typeof companies.$inferSelect;
+export type ResumeItem = typeof resumeItems.$inferSelect;
+export type MentorBriefRow = typeof mentorBriefs.$inferSelect;
 
 export type ProblemStatusValue = "unsolved" | "solved" | "revise";

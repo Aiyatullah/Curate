@@ -45,6 +45,21 @@ Config lives in `.env.local`:
 | `/problems` | Question bank grouped by track topic |
 | `/graph` | Per-topic knowledge graph (solved / accuracy / AI readiness / interview score / revise / confidence) |
 
+## Phases 3–6
+
+| Phase | Route(s) | What |
+|---|---|---|
+| **3 — Engineering Interview OS** | `/challenges`, `/challenges/[id]` | 22 non-DSA challenges (frontend / backend / API design). Tick requirements, write an approach, submit code/design → staff-engineer review (`src/data/challenges/*.json`, `lib/challenges/evaluate.ts`). |
+| **4 — System Design OS** | `/design`, `/design/[id]` | Seven-pass design studio (requirements → scale → data model → API → high-level → deep dives → trade-offs) → principal-engineer review listing what you *missed* and the follow-ups you'd get (`lib/systemdesign/*`). |
+| **5 — Career OS** | `/career` | Company readiness (DSA / engineering / system-design %, all **computed live** from the other phases — `lib/career/readiness.ts`), add custom targets, resume tracker (projects / OSS / blogs / applications / referrals). |
+| **6 — AI Mentor** | dashboard top card | One brief per day: names the single thing to work on, the concrete next move with a CTA, your strengths/weaknesses, drawn from the knowledge graph + interview red flags + code-review gaps (`lib/mentor/*`, cached in `mentor_briefs`). |
+
+## Accessibility
+
+Skip-to-content link, semantic landmarks (`<header>`/`<nav aria-label>`/`<main id>`/`<footer>`),
+`aria-current` on the active nav item, visible `:focus-visible` outlines everywhere,
+`role="progressbar"` meters, `prefers-reduced-motion` honoured, icon buttons labelled.
+
 ## Phase 2 — Interview Thinking OS
 
 `/interview/[problemId]` (also linked from Stage 4 of a solve and the dashboard).
