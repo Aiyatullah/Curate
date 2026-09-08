@@ -1,0 +1,12 @@
+{
+  "topic": "Matrix",
+  "problems": [
+    { "id": "lc_73", "title": "Set Matrix Zeroes", "difficulty": "Medium", "subtopic": "First row/col as markers", "leetcodeUrl": "https://leetcode.com/problems/set-matrix-zeroes/", "optimalComplexity": "O(m*n) time / O(1) space", "patternTags": ["matrix", "in-place-markers"], "companyTags": ["Amazon", "Microsoft", "Facebook"], "lists": ["neetcode150", "grind169"], "trackOrder": 1 },
+    { "id": "lc_54", "title": "Spiral Matrix", "difficulty": "Medium", "subtopic": "Shrinking bounds", "leetcodeUrl": "https://leetcode.com/problems/spiral-matrix/", "optimalComplexity": "O(m*n) time / O(1) space", "patternTags": ["matrix", "simulation"], "companyTags": ["Amazon", "Microsoft", "Google", "Uber"], "lists": ["neetcode150", "grind169"], "trackOrder": 2 },
+    { "id": "lc_48", "title": "Rotate Image", "difficulty": "Medium", "subtopic": "Transpose + reverse", "leetcodeUrl": "https://leetcode.com/problems/rotate-image/", "optimalComplexity": "O(n^2) time / O(1) space", "patternTags": ["matrix", "in-place"], "companyTags": ["Amazon", "Microsoft", "Apple"], "lists": ["neetcode150", "grind169"], "trackOrder": 3 },
+    { "id": "lc_240", "title": "Search a 2D Matrix II", "difficulty": "Medium", "subtopic": "Staircase search", "leetcodeUrl": "https://leetcode.com/problems/search-a-2d-matrix-ii/", "optimalComplexity": "O(m+n) time / O(1) space", "patternTags": ["matrix", "search"], "companyTags": ["Amazon", "Google", "Microsoft"], "lists": ["grind169"], "trackOrder": 4 },
+    { "id": "lc_289", "title": "Game of Life", "difficulty": "Medium", "subtopic": "In-place state encoding", "leetcodeUrl": "https://leetcode.com/problems/game-of-life/", "optimalComplexity": "O(m*n) time / O(1) space", "patternTags": ["matrix", "bit-encoding"], "companyTags": ["Amazon", "Google", "Dropbox"], "lists": [], "trackOrder": 5 },
+    { "id": "lc_1091", "title": "Shortest Path in Binary Matrix", "difficulty": "Medium", "subtopic": "8-dir BFS", "leetcodeUrl": "https://leetcode.com/problems/shortest-path-in-binary-matrix/", "optimalComplexity": "O(n^2) time / O(n^2) space", "patternTags": ["matrix", "grid-bfs"], "companyTags": ["Amazon", "Facebook"], "lists": [], "trackOrder": 6 },
+    { "id": "lc_36_m", "title": "Valid Sudoku", "difficulty": "Medium", "subtopic": "Row/col/box sets", "leetcodeUrl": "https://leetcode.com/problems/valid-sudoku/", "optimalComplexity": "O(1) (fixed 9x9)", "patternTags": ["matrix", "hashset"], "companyTags": ["Amazon", "Apple"], "lists": ["neetcode150"], "trackOrder": 7 }
+  ]
+}

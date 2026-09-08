@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+:root {
+  --bg: oklch(17% 0.012 260);
+  --bg-raised: oklch(21% 0.014 260);
+  --bg-inset: oklch(14% 0.01 260);
+  --border: oklch(30% 0.014 260);
+  --text: oklch(93% 0.01 260);
+  --text-dim: oklch(70% 0.015 260);
+  --text-faint: oklch(55% 0.015 260);
+  --accent: oklch(72% 0.15 145);
+  --accent-warm: oklch(76% 0.14 65);
+  --danger: oklch(66% 0.16 25);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-raised: var(--bg-raised);
+  --color-bg-inset: var(--bg-inset);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+  --color-text-faint: var(--text-faint);
+  --color-accent: var(--accent);
+  --color-accent-warm: var(--accent-warm);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+* {
+  border-color: var(--border);
+}
