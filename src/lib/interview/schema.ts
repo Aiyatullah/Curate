@@ -25,6 +25,30 @@ export type InterviewScore = z.infer<typeof interviewScoreSchema>;
 
 export type TranscriptEntry = { role: "interviewer" | "candidate"; text: string };
 
+export const SECTION_KINDS = [
+  "coding",
+  "system-design",
+  "challenge",
+  "behavioral",
+  "concepts",
+] as const;
+export type SectionKind = (typeof SECTION_KINDS)[number];
+
+export type InterviewConfig = {
+  role: string; // free text: "Senior Frontend Engineer at Vercel"
+  seniority: "junior" | "mid" | "senior" | "staff";
+  sections: SectionKind[]; // which sections to include
+  surprise: boolean; // true = interviewer picks the specifics
+};
+
+export type PlanSection = {
+  kind: SectionKind;
+  ref: string | null; // problem id / challenge id / design prompt title
+  label: string;
+  brief: string; // what the interviewer should probe in this section
+};
+export type InterviewPlan = { sections: PlanSection[] };
+
 export type InterviewContext = {
   problem?: {
     title: string;
@@ -39,4 +63,14 @@ export type InterviewContext = {
     bruteForceIdea?: string | null;
     whyItWorks?: string | null;
   } | null;
+  config?: InterviewConfig | null;
+  plan?: InterviewPlan | null;
+};
+
+export const SECTION_LABEL: Record<SectionKind, string> = {
+  coding: "Coding",
+  "system-design": "System design",
+  challenge: "Practical build",
+  behavioral: "Behavioral",
+  concepts: "Role concepts",
 };

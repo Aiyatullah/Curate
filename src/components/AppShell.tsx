@@ -40,6 +40,13 @@ const I = {
       <circle cx="8" cy="8" r="2" />
     </>
   ),
+  mic: (
+    <path
+      d="M8 2a2 2 0 0 0-2 2v4a2 2 0 1 0 4 0V4a2 2 0 0 0-2-2ZM4 8a4 4 0 0 0 8 0M8 12v2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
 };
 
 const GROUPS: { title: string; items: Item[] }[] = [
@@ -54,6 +61,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
   {
     title: "Interview",
     items: [
+      { href: "/interview", label: "Mock interview", icon: I.mic },
       { href: "/challenges", label: "Challenges", icon: I.build },
       { href: "/design", label: "System design", icon: I.grid },
     ],

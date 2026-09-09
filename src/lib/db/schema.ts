@@ -9,7 +9,11 @@ import {
   serial,
 } from "drizzle-orm/pg-core";
 import type { AnalysisResult } from "@/lib/analysis/schema";
-import type { InterviewScore } from "@/lib/interview/schema";
+import type {
+  InterviewScore,
+  InterviewConfig,
+  InterviewPlan,
+} from "@/lib/interview/schema";
 import type { SystemDesignReview } from "@/lib/systemdesign/schema";
 import type { MentorBrief } from "@/lib/mentor/schema";
 
@@ -91,8 +95,10 @@ export const solveSessions = pgTable("solve_sessions", {
  */
 export const interviewSessions = pgTable("interview_sessions", {
   id: serial("id").primaryKey(),
-  problemId: text("problem_id").references(() => problems.id), // nullable: freeform interviews allowed
+  problemId: text("problem_id").references(() => problems.id), // set for the quick "interview on this problem" path
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  config: jsonb("config").$type<InterviewConfig | null>(), // role / seniority / sections (configured interviews)
+  plan: jsonb("plan").$type<InterviewPlan | null>(), // resolved ordered sections
   transcript: jsonb("transcript")
     .$type<{ role: "interviewer" | "candidate"; text: string }[]>()
     .notNull()

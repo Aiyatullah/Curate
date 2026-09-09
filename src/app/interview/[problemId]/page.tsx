@@ -29,15 +29,15 @@ export default async function InterviewPage({
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="reveal reveal-1">
         <Link
-          href={`/practice/${problemId}`}
+          href="/interview"
           className="text-xs text-text-faint hover:text-text-dim"
         >
-          ← Back to solve
+          ← Interview hub
         </Link>
         <h1 className="display mt-2 text-[length:var(--text-title)]">
-          Mock Interview · {problem.title}
+          Mock interview · {problem.title}
         </h1>
         <p className="mt-1 text-sm text-text-dim">
           {problem.difficulty} · {problem.topic}
@@ -45,9 +45,23 @@ export default async function InterviewPage({
       </div>
       <SessionRecorder label="Record this interview (optional)" />
       <InterviewChat
-        problemId={problem.id}
-        problemTitle={problem.title}
-        hasSolveSession={!!session}
+        startPayload={{ problemId: problem.id }}
+        startLabel="Start debrief →"
+        splash={
+          <>
+            <p className="text-sm text-text-dim">
+              A senior engineer will debrief you on{" "}
+              <strong>{problem.title}</strong> — approach, complexity, tradeoffs
+              and edge cases, then a scorecard.
+            </p>
+            {!session && (
+              <p className="text-xs text-accent-warm">
+                You haven&apos;t submitted a solution yet — the interviewer runs
+                without your code. Solve it first for a sharper debrief.
+              </p>
+            )}
+          </>
+        }
       />
     </div>
   );

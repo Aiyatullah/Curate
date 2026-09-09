@@ -1,12 +1,20 @@
 import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { problems, solveSessions, interviewSessions } from "@/lib/db/schema";
 import {
-  nextInterviewerTurn,
-  gradeInterview,
-} from "@/lib/interview/engine";
-import type { InterviewContext, TranscriptEntry } from "@/lib/interview/schema";
+  problems,
+  solveSessions,
+  interviewSessions,
+  type InterviewSession,
+} from "@/lib/db/schema";
+import { nextInterviewerTurn, gradeInterview } from "@/lib/interview/engine";
+import { buildPlan } from "@/lib/interview/plan";
+import {
+  SECTION_KINDS,
+  type InterviewConfig,
+  type InterviewContext,
+  type TranscriptEntry,
+} from "@/lib/interview/schema";
 import { recomputeTopic } from "@/lib/knowledge/update";
 
 export async function POST(req: Request) {
@@ -23,66 +31,99 @@ export async function POST(req: Request) {
   }
 }
 
-async function loadContext(problemId?: string): Promise<InterviewContext> {
-  if (!problemId) return {};
-  const [problem] = await db
-    .select()
-    .from(problems)
-    .where(eq(problems.id, problemId));
-  const [session] = await db
-    .select()
-    .from(solveSessions)
-    .where(eq(solveSessions.problemId, problemId))
-    .orderBy(desc(solveSessions.createdAt))
-    .limit(1);
-
-  return {
-    problem: problem
+/** Context for a session — from a linked solve session and/or the configured plan. */
+async function contextFor(session: {
+  problemId: string | null;
+  config: InterviewSession["config"];
+  plan: InterviewSession["plan"];
+}): Promise<InterviewContext> {
+  const ctx: InterviewContext = {
+    config: session.config ?? null,
+    plan: session.plan ?? null,
+  };
+  if (session.problemId) {
+    const [problem] = await db
+      .select()
+      .from(problems)
+      .where(eq(problems.id, session.problemId));
+    const [solve] = await db
+      .select()
+      .from(solveSessions)
+      .where(eq(solveSessions.problemId, session.problemId))
+      .orderBy(desc(solveSessions.createdAt))
+      .limit(1);
+    ctx.problem = problem
       ? {
           title: problem.title,
           difficulty: problem.difficulty,
           topic: problem.topic,
           optimalComplexity: problem.optimalComplexity,
         }
-      : null,
-    code: session?.code ?? null,
-    language: session?.language ?? null,
-    journal: session
+      : null;
+    ctx.code = solve?.code ?? null;
+    ctx.language = solve?.language ?? null;
+    ctx.journal = solve
       ? {
-          firstThought: session.firstThought,
-          bruteForceIdea: session.bruteForceIdea,
-          whyItWorks: session.whyItWorks,
+          firstThought: solve.firstThought,
+          bruteForceIdea: solve.bruteForceIdea,
+          whyItWorks: solve.whyItWorks,
         }
-      : null,
-  };
+      : null;
+  }
+  return ctx;
 }
 
-async function start(body: { problemId?: string }) {
-  const ctx = await loadContext(body.problemId);
+function sanitizeConfig(raw: unknown): InterviewConfig | null {
+  if (!raw || typeof raw !== "object") return null;
+  const c = raw as Record<string, unknown>;
+  const role = typeof c.role === "string" ? c.role.slice(0, 200).trim() : "";
+  if (!role) return null;
+  const seniority = ["junior", "mid", "senior", "staff"].includes(c.seniority as string)
+    ? (c.seniority as InterviewConfig["seniority"])
+    : "mid";
+  const sections = Array.isArray(c.sections)
+    ? (c.sections.filter((s) => SECTION_KINDS.includes(s)) as InterviewConfig["sections"])
+    : [];
+  return { role, seniority, sections, surprise: c.surprise !== false };
+}
+
+async function start(body: { problemId?: string; config?: unknown }) {
+  const config = sanitizeConfig(body.config);
+  const plan = config ? await buildPlan(config) : null;
+
+  const session = {
+    problemId: body.problemId ?? null,
+    config,
+    plan,
+  };
+  const ctx = await contextFor(session);
   const turn = await nextInterviewerTurn(ctx, []);
-  const transcript: TranscriptEntry[] = [
-    { role: "interviewer", text: turn.message },
-  ];
+  const transcript: TranscriptEntry[] = [{ role: "interviewer", text: turn.message }];
+
   const [row] = await db
     .insert(interviewSessions)
-    .values({ problemId: body.problemId ?? null, transcript })
+    .values({ ...session, transcript })
     .returning({ id: interviewSessions.id });
-  return NextResponse.json({ sessionId: row.id, turn });
+  return NextResponse.json({ sessionId: row.id, turn, plan });
+}
+
+async function loadSession(id: number) {
+  const [s] = await db
+    .select()
+    .from(interviewSessions)
+    .where(eq(interviewSessions.id, id));
+  return s ?? null;
 }
 
 async function reply(body: { sessionId: number; text: string; durationSec?: number }) {
-  const [session] = await db
-    .select()
-    .from(interviewSessions)
-    .where(eq(interviewSessions.id, body.sessionId));
+  const session = await loadSession(body.sessionId);
   if (!session) return NextResponse.json({ error: "No session" }, { status: 404 });
 
-  const ctx = await loadContext(session.problemId ?? undefined);
+  const ctx = await contextFor(session);
   const transcript: TranscriptEntry[] = [
     ...(session.transcript ?? []),
     { role: "candidate", text: body.text },
   ];
-
   const turn = await nextInterviewerTurn(ctx, transcript);
   transcript.push({ role: "interviewer", text: turn.message });
 
@@ -91,28 +132,18 @@ async function reply(body: { sessionId: number; text: string; durationSec?: numb
     .set({ transcript, durationSec: body.durationSec ?? session.durationSec ?? 0 })
     .where(eq(interviewSessions.id, body.sessionId));
 
-  if (turn.mode === "wrap") {
-    return finalize(body.sessionId, ctx, transcript, turn.message);
-  }
+  if (turn.mode === "wrap") return finalize(body.sessionId, ctx, transcript, turn.message);
   return NextResponse.json({ turn });
 }
 
-async function end(body: {
-  sessionId: number;
-  durationSec?: number;
-  text?: string;
-}) {
-  const [session] = await db
-    .select()
-    .from(interviewSessions)
-    .where(eq(interviewSessions.id, body.sessionId));
+async function end(body: { sessionId: number; durationSec?: number; text?: string }) {
+  const session = await loadSession(body.sessionId);
   if (!session) return NextResponse.json({ error: "No session" }, { status: 404 });
 
-  const ctx = await loadContext(session.problemId ?? undefined);
+  const ctx = await contextFor(session);
   const transcript: TranscriptEntry[] = [...(session.transcript ?? [])];
-  if (body.text?.trim()) {
-    transcript.push({ role: "candidate", text: body.text.trim() });
-  }
+  if (body.text?.trim()) transcript.push({ role: "candidate", text: body.text.trim() });
+
   const wrap = await nextInterviewerTurn(ctx, transcript, true);
   const full: TranscriptEntry[] = [
     ...transcript,
@@ -143,9 +174,7 @@ async function finalize(
     .set({ score: graded.score, feedback: graded.score.feedback })
     .where(eq(interviewSessions.id, sessionId));
 
-  if (ctx.problem?.topic) {
-    await recomputeTopic(ctx.problem.topic).catch(() => {});
-  }
+  if (ctx.problem?.topic) await recomputeTopic(ctx.problem.topic).catch(() => {});
 
   return NextResponse.json({
     turn: { mode: "wrap", message: wrapMessage },

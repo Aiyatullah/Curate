@@ -8,10 +8,23 @@ import {
   type InterviewContext,
 } from "./schema";
 
-const MAX_QUESTIONS = 6;
+const MAX_QUESTIONS_QUICK = 6;
 
 function contextBlock(ctx: InterviewContext): string {
   const parts: string[] = [];
+  if (ctx.config) {
+    parts.push(
+      `ROLE: ${ctx.config.seniority} — ${ctx.config.role}. Calibrate difficulty and expectations to this.`,
+    );
+  }
+  if (ctx.plan?.sections.length) {
+    parts.push(
+      "INTERVIEW PLAN (work through these in order, ~2-3 questions each, then move on; wrap after the last):\n" +
+        ctx.plan.sections
+          .map((s, i) => `  ${i + 1}. [${s.label}] ${s.brief}`)
+          .join("\n"),
+    );
+  }
   if (ctx.problem) {
     parts.push(
       `PROBLEM: ${ctx.problem.title} (${ctx.problem.difficulty}, ${ctx.problem.topic})`,
@@ -49,23 +62,35 @@ export async function nextInterviewerTurn(
   force = false,
 ): Promise<InterviewTurn> {
   const asked = transcript.filter((e) => e.role === "interviewer").length;
-  const shouldWrap = force || asked >= MAX_QUESTIONS;
+  const planned = ctx.plan?.sections.length ?? 0;
+  const budget = planned ? Math.min(4 + planned * 3, 22) : MAX_QUESTIONS_QUICK;
+  const shouldWrap = force || asked >= budget;
 
-  const system = `You are a senior engineer conducting a coding interview debrief. You are
-warm but probing. You ask ONE focused question at a time. Good interviewers make the
-candidate: state the brute force and its complexity, justify the optimal approach,
-analyse time/space out loud, discuss tradeoffs and edge cases, and reason about
-alternatives. Push on vague answers ("why is that O(1)?", "what breaks if the input
-is empty?"). Never give the answer away. Keep each turn to 1-3 sentences.
+  const system = `You are a senior engineer running a ${
+    planned ? "structured mock interview" : "coding interview debrief"
+  }. You are warm but probing. You ask ONE focused question at a time and keep each
+turn to 1-3 sentences. ${
+    planned
+      ? "Follow the INTERVIEW PLAN: cover each section with ~2-3 questions, signpost when you move to a new section, then wrap after the last section."
+      : "Make the candidate state the brute force and its complexity, justify the optimal approach, analyse time/space out loud, and discuss tradeoffs and edge cases."
+  } Push on vague answers ("why is that O(1)?", "what breaks on empty input?"). Never
+give the answer away.
 
 Return ONLY JSON: { "mode": "question" | "wrap", "message": string }.
-- "question": your next single question.
-- "wrap": ${shouldWrap ? "REQUIRED now — thank them and say the debrief is complete. No new question." : "only if the candidate has thoroughly covered approach, complexity, tradeoffs and edge cases."}`;
+- "question": your next single question (signpost a section change inside it if you're moving on).
+- "wrap": ${
+    shouldWrap
+      ? "REQUIRED now — thank them, say the interview is complete. No new question."
+      : "only when every planned section has been covered (or, for a debrief, approach + complexity + tradeoffs + edge cases)."
+  }`;
 
+  const opener = planned
+    ? "(not started — greet them, name the format briefly, then ask the first question of section 1.)"
+    : "(not started — open with 'Walk me through your approach.')";
   const user = `${contextBlock(ctx)}
 
 --- INTERVIEW SO FAR ---
-${transcript.length ? transcriptText(transcript) : "(not started — open with 'Walk me through your approach.')"}
+${transcript.length ? transcriptText(transcript) : opener}
 
 Produce the interviewer's next turn.`;
 
@@ -96,14 +121,17 @@ export async function gradeInterview(
 ): Promise<
   { ok: true; score: InterviewScore } | { ok: false; error: string }
 > {
-  const system = `You grade a mock coding interview. Score each 0-10:
+  const roleLine = ctx.config
+    ? `This was a ${ctx.config.seniority} interview for: ${ctx.config.role}. Grade against that bar.\n`
+    : "";
+  const system = `${roleLine}You grade a mock interview. Score each 0-10:
 - communication: structure, signposting, not rambling, checking in with the interviewer
 - clarity: precise language, correct terminology, easy to follow
 - tradeoffDiscussion: did they compare approaches, name what they gave up, discuss alternatives
-- complexityExplanation: did they analyse time AND space correctly and out loud
+- complexityExplanation: did they analyse complexity / scale / cost correctly and out loud
 
-Reward stating brute force first. Penalise jumping straight to code, hand-waving
-complexity, ignoring edge cases, needing the interviewer to drag answers out.
+Reward stating a baseline first and thinking out loud. Penalise jumping to a solution,
+hand-waving complexity or scale, ignoring edge cases, needing answers dragged out.
 
 Return ONLY JSON:
 { "scores": {"communication":n,"clarity":n,"tradeoffDiscussion":n,"complexityExplanation":n},
@@ -140,4 +168,4 @@ function stripFence(s: string): string {
     : t;
 }
 
-export { MAX_QUESTIONS };
+export { MAX_QUESTIONS_QUICK };

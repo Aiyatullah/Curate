@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { InterviewScore, TranscriptEntry } from "@/lib/interview/schema";
@@ -8,12 +8,14 @@ import { useSpeechInput } from "@/lib/useSpeechInput";
 import { InterviewScorecard } from "./InterviewScorecard";
 
 type Props = {
-  problemId: string;
-  problemTitle: string;
-  hasSolveSession: boolean;
+  /** Payload for the interview `start` action — either { problemId } or { config }. */
+  startPayload: Record<string, unknown>;
+  /** Pre-start splash. If omitted, the interview auto-starts on mount. */
+  splash?: React.ReactNode;
+  startLabel?: string;
 };
 
-export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Props) {
+export function InterviewChat({ startPayload, splash, startLabel }: Props) {
   const router = useRouter();
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
@@ -24,6 +26,7 @@ export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Prop
   const [score, setScore] = useState<InterviewScore | null>(null);
   const [error, setError] = useState<string | null>(null);
   const startedAt = useRef<number>(0);
+  const autoStarted = useRef(false);
 
   const appendSpeech = (t: string) =>
     setDraft((d) => (d ? `${d} ${t}` : t).replace(/\s+/g, " "));
@@ -34,7 +37,7 @@ export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Prop
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [transcript, score]);
 
-  async function start() {
+  const start = useCallback(async () => {
     setBusy(true);
     setError(null);
     startedAt.current = Date.now();
@@ -42,7 +45,7 @@ export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Prop
       const res = await fetch("/api/interview", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action: "start", problemId }),
+        body: JSON.stringify({ action: "start", ...startPayload }),
       });
       const data = await res.json();
       if (data.sessionId) {
@@ -55,7 +58,15 @@ export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Prop
     } finally {
       setBusy(false);
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!splash && !autoStarted.current) {
+      autoStarted.current = true;
+      void start();
+    }
+  }, [splash, start]);
 
   async function send(endNow = false) {
     if (!sessionId || busy) return;
@@ -93,26 +104,18 @@ export function InterviewChat({ problemId, problemTitle, hasSolveSession }: Prop
   }
 
   if (!started) {
+    if (!splash) {
+      return (
+        <p className="panel p-6 text-sm text-text-faint">
+          {busy ? "Setting up the interview…" : error ?? "Starting…"}
+        </p>
+      );
+    }
     return (
       <div className="space-y-4 panel p-6">
-        <p className="text-sm text-text-dim">
-          A senior engineer will debrief you on <strong>{problemTitle}</strong> —
-          up to ~6 questions probing your approach, complexity analysis, tradeoffs
-          and edge cases, then a scorecard.
-        </p>
-        {!hasSolveSession && (
-          <p className="text-xs text-accent-warm">
-            You haven&apos;t submitted a solution for this problem yet. The
-            interviewer will run without your code — solve it first for a sharper
-            debrief.
-          </p>
-        )}
-        <button
-          onClick={start}
-          disabled={busy}
-          className="btn btn-primary"
-        >
-          {busy ? "Starting…" : "Start mock interview →"}
+        {splash}
+        <button onClick={start} disabled={busy} className="btn btn-primary">
+          {busy ? "Starting…" : (startLabel ?? "Start mock interview →")}
         </button>
         {error && <p className="text-sm text-danger">{error}</p>}
       </div>
