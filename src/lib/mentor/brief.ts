@@ -19,8 +19,17 @@ function today(): string {
 }
 
 async function gatherContext() {
-  const [state, graph, rec, revise, recentIv, chDone, sdDone, recentAnalyses] =
-    await Promise.all([
+  const [
+    state,
+    graph,
+    rec,
+    revise,
+    solvedRow,
+    recentIv,
+    chDone,
+    sdDone,
+    recentAnalyses,
+  ] = await Promise.all([
       getAppState(),
       db.select().from(knowledgeGraph),
       recommendNext(),
@@ -28,6 +37,10 @@ async function gatherContext() {
         .select({ n: sql<number>`count(*)::int` })
         .from(problemStatus)
         .where(eq(problemStatus.status, "revise")),
+      db
+        .select({ n: sql<number>`count(*)::int` })
+        .from(problemStatus)
+        .where(eq(problemStatus.status, "solved")),
       db
         .select({ score: interviewSessions.score })
         .from(interviewSessions)
@@ -77,6 +90,7 @@ async function gatherContext() {
 
   return {
     streakDays: state.streakDays,
+    solved: Number(solvedRow[0]?.n ?? 0),
     weak,
     strong,
     reviseCount: Number(revise[0]?.n ?? 0),
@@ -90,18 +104,35 @@ async function gatherContext() {
   };
 }
 
+/** Fingerprint of the state that should make the brief stale when it changes. */
+function signatureOf(ctx: Awaited<ReturnType<typeof gatherContext>>): string {
+  return [
+    ctx.solved,
+    ctx.reviseCount,
+    ctx.challengesDone,
+    ctx.systemDesignsDone,
+    ctx.streakDays,
+    ctx.recommended?.id ?? "",
+    ctx.strong.length,
+    ctx.weak.length,
+  ].join("|");
+}
+
 export async function getOrCreateBrief(refresh = false): Promise<MentorBrief | null> {
   const forDate = today();
+  const ctx = await gatherContext();
+  const signature = signatureOf(ctx);
+
   if (!refresh) {
     const [existing] = await db
       .select()
       .from(mentorBriefs)
       .where(eq(mentorBriefs.forDate, forDate))
       .limit(1);
-    if (existing?.brief) return existing.brief;
+    // Reuse only if the underlying state hasn't moved since it was written.
+    if (existing?.brief && existing.signature === signature) return existing.brief;
   }
 
-  const ctx = await gatherContext();
   const system = `You are a calm, direct engineering interview mentor who has followed this
 candidate for weeks. You know their history. Give them today's brief: name the ONE thing to
 work on, tie it to a concrete action, and be honest but encouraging. No fluff, no lists of
@@ -147,8 +178,11 @@ Write today's brief.`;
   try {
     await db
       .insert(mentorBriefs)
-      .values({ forDate, brief })
-      .onConflictDoUpdate({ target: mentorBriefs.forDate, set: { brief } });
+      .values({ forDate, brief, signature })
+      .onConflictDoUpdate({
+        target: mentorBriefs.forDate,
+        set: { brief, signature },
+      });
   } catch (err) {
     console.warn("[mentor] could not cache brief:", err);
   }

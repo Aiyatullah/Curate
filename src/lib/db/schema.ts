@@ -211,6 +211,7 @@ export const resumeItems = pgTable("resume_items", {
 export const mentorBriefs = pgTable("mentor_briefs", {
   id: serial("id").primaryKey(),
   forDate: date("for_date").notNull().unique(), // one brief per day
+  signature: text("signature"), // state fingerprint — regenerate when it changes
   brief: jsonb("brief").$type<MentorBrief | null>(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
