@@ -111,6 +111,11 @@ async function runAnalyze(body: UpsertBody) {
     .set({ analysis: result.result })
     .where(eq(solveSessions.id, sessionId));
 
+  // An analysed attempt counts immediately — attempt count + last readiness show
+  // on the dashboard / graph even before the candidate marks it solved.
+  await recomputeProblemStatus(session.problemId);
+  await recomputeTopic(problem.topic).catch(() => {});
+
   return NextResponse.json({ sessionId, analysis: result.result });
 }
 

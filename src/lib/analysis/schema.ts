@@ -16,6 +16,8 @@ export const analysisResultSchema = z.object({
     space: z.string(),
   }),
   claimedVsActual: z.string(), // compares what the user claimed vs. what the code is
+  codeWalkthrough: z.string().default(""), // plain-English trace of what THIS code actually does
+  mistakeInThinking: z.string().default(""), // "you thought X, but your code does Y"
   thinkingReview: z.object({
     good: z.array(z.string()),
     gaps: z.array(z.string()),
@@ -29,6 +31,14 @@ export const analysisResultSchema = z.object({
   ),
   whatsLacking: z.array(z.string()),
   howToThinkNextTime: z.array(z.string()),
+  referenceSolution: z
+    .object({
+      language: z.string().default(""),
+      code: z.string().default(""),
+      explanation: z.string().default(""),
+    })
+    .nullable()
+    .optional(),
   readinessVerdict: z.string(),
 });
 

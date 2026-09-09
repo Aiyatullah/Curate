@@ -26,10 +26,13 @@ Return ONLY a JSON object matching this type (no prose, no fence):
   "scores": { "correctness": n, "complexity": n, "codeQuality": n, "interviewReadiness": n },  // each 0-10
   "detectedComplexity": { "time": string, "space": string },   // for API-design tasks put "n/a" and use notes
   "claimedVsActual": string,   // does the solution actually meet the requirements it claims to?
+  "codeWalkthrough": string,   // trace what the submission actually does, and where it falls short of the requirements
+  "mistakeInThinking": string, // "your approach note said X, your code does Y" — "" if they match
   "thinkingReview": { "good": string[], "gaps": string[] },
   "codeIssues": [ { "severity": "high"|"med"|"low", "line": number|null, "note": string } ],
   "whatsLacking": string[],          // requirements not met, missing edge cases, missing accessibility, etc.
   "howToThinkNextTime": string[],    // 2-4 ordered steps
+  "referenceSolution": { "language": string, "code": string, "explanation": string },  // a strong reference implementation (or the key structure for api-design), commented
   "readinessVerdict": string
 }
 

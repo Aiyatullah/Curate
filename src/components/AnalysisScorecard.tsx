@@ -8,17 +8,14 @@ const SCORE_LABELS: Record<keyof AnalysisResult["scores"], string> = {
 };
 
 export function AnalysisScorecard({ a }: { a: AnalysisResult }) {
+  const ref = a.referenceSolution;
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {(
-          Object.keys(a.scores) as (keyof AnalysisResult["scores"])[]
-        ).map((k) => (
+        {(Object.keys(a.scores) as (keyof AnalysisResult["scores"])[]).map((k) => (
           <div key={k} className="panel-inset p-4">
-            <p className="label">
-              {SCORE_LABELS[k]}
-            </p>
-            <p className="mt-1 text-2xl font-semibold">
+            <p className="label">{SCORE_LABELS[k]}</p>
+            <p className="stat-num mt-1 text-2xl font-semibold">
               {a.scores[k]}
               <span className="text-sm text-text-faint">/10</span>
             </p>
@@ -26,10 +23,28 @@ export function AnalysisScorecard({ a }: { a: AnalysisResult }) {
         ))}
       </div>
 
-      <p className="rounded-lg border border-border bg-bg-raised px-4 py-3 text-sm">
-        <span className="font-medium text-accent-warm">Verdict: </span>
+      <p className="panel-inset px-4 py-3 text-sm">
+        <span className="label mr-2">Verdict</span>
         {a.readinessVerdict}
       </p>
+
+      {a.mistakeInThinking?.trim() && (
+        <div
+          className="rounded-[9px] border-l-2 px-4 py-3 text-sm"
+          style={{ borderColor: "var(--danger)", background: "var(--danger-soft)" }}
+        >
+          <p className="label mb-1" style={{ color: "var(--danger)" }}>
+            Where your thinking and your code diverge
+          </p>
+          {a.mistakeInThinking}
+        </div>
+      )}
+
+      {a.codeWalkthrough?.trim() && (
+        <Row title="Your code, traced">
+          <p className="text-sm leading-relaxed text-text-dim">{a.codeWalkthrough}</p>
+        </Row>
+      )}
 
       <Row title="Detected complexity">
         <p className="font-mono text-sm text-text-dim">
@@ -89,6 +104,24 @@ export function AnalysisScorecard({ a }: { a: AnalysisResult }) {
           </ol>
         </Row>
       </div>
+
+      {ref?.code?.trim() && (
+        <details className="panel-inset overflow-hidden">
+          <summary className="cursor-pointer px-4 py-3 text-sm text-accent">
+            Show a clean optimal solution
+          </summary>
+          <div className="border-t border-border p-4">
+            <pre className="overflow-x-auto rounded-md bg-bg-sunken p-3 font-mono text-xs leading-relaxed text-text">
+              <code>{ref.code}</code>
+            </pre>
+            {ref.explanation?.trim() && (
+              <p className="mt-3 text-sm leading-relaxed text-text-dim">
+                {ref.explanation}
+              </p>
+            )}
+          </div>
+        </details>
+      )}
     </div>
   );
 }
@@ -96,9 +129,7 @@ export function AnalysisScorecard({ a }: { a: AnalysisResult }) {
 function Row({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="label mb-2">
-        {title}
-      </h3>
+      <h3 className="label mb-2">{title}</h3>
       {children}
     </div>
   );

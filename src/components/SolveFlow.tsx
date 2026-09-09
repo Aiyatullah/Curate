@@ -5,14 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { AnalysisResult } from "@/lib/analysis/schema";
 import { AnalysisScorecard } from "./AnalysisScorecard";
+import { HintPanel } from "./HintPanel";
 
-const LANGS = ["python", "java", "javascript", "go"];
-
-const HINTS = [
-  "Restate the problem in one sentence. What is the brute-force approach and its Big-O?",
-  "What repeated work does the brute force do? Can a hash map, sorted order, or two pointers remove it?",
-  "Name the pattern out loud (hash map / two pointers / sliding window / binary search) and write the invariant it maintains.",
-];
+const LANGS = ["python", "java", "javascript", "typescript", "go", "c++"];
 
 type Props = {
   problem: {
@@ -27,10 +22,9 @@ export function SolveFlow({ problem }: Props) {
   const router = useRouter();
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [attemptNumber, setAttemptNumber] = useState<number | null>(null);
-  // Guards against concurrent onBlur saves each inserting a new row before the
-  // first insert returns an id.
   const sessionIdRef = useRef<number | null>(null);
   const savingRef = useRef<Promise<void> | null>(null);
+  const firstThoughtRef = useRef("");
 
   // Stage 1
   const [firstThought, setFirstThought] = useState("");
@@ -51,6 +45,8 @@ export function SolveFlow({ problem }: Props) {
 
   // Stage 4
   const [recording, setRecording] = useState(false);
+  const [recorded, setRecorded] = useState(false);
+  const recordRef = useRef<HTMLDivElement>(null);
 
   // timer
   const [seconds, setSeconds] = useState(0);
@@ -65,6 +61,14 @@ export function SolveFlow({ problem }: Props) {
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [started]);
+
+  // When the analysis lands, pull attention to the "record" step — it's the one
+  // that actually counts.
+  useEffect(() => {
+    if (analysis) {
+      recordRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [analysis]);
 
   const mmss = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(
     seconds % 60,
@@ -85,7 +89,6 @@ export function SolveFlow({ problem }: Props) {
   }
 
   async function save(): Promise<void> {
-    // Serialize saves so the first one establishes the session id.
     const prior = savingRef.current ?? Promise.resolve();
     const next = prior.then(async () => {
       const res = await fetch("/api/solve", {
@@ -113,7 +116,7 @@ export function SolveFlow({ problem }: Props) {
     setAnalyzing(true);
     setError(null);
     try {
-      await save(); // ensure the session exists and latest edits are persisted
+      await save();
       const res = await fetch("/api/solve", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -137,13 +140,10 @@ export function SolveFlow({ problem }: Props) {
     }
   }
 
-  async function record(
-    selfRating: string,
-    solved: boolean,
-    reviseAfter = false,
-  ) {
+  async function record(selfRating: string, solved: boolean, reviseAfter = false) {
     if (!sessionIdRef.current) return;
     setRecording(true);
+    setRecorded(true);
     await fetch("/api/solve", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -158,6 +158,12 @@ export function SolveFlow({ problem }: Props) {
     router.push("/");
     router.refresh();
   }
+
+  const suggested = analysis
+    ? analysis.scores.correctness >= 8
+      ? "solved"
+      : "unsolved"
+    : null;
 
   return (
     <div className="space-y-4">
@@ -178,20 +184,23 @@ export function SolveFlow({ problem }: Props) {
           Open on LeetCode ↗
         </a>
         <Field
-          label="First thought — what jumps out?"
+          label="First thought — what jumps out? (even 'no idea yet' is fine)"
           value={firstThought}
-          onChange={setFirstThought}
+          onChange={(v) => {
+            setFirstThought(v);
+            firstThoughtRef.current = v;
+          }}
           onBlur={save}
         />
         <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
           <Field
-            label="Brute-force approach"
+            label="Brute-force approach (optional)"
             value={bruteForceIdea}
             onChange={setBruteForceIdea}
             onBlur={save}
           />
           <Field
-            label="Its Big-O"
+            label="Its Big-O (optional)"
             value={bruteForceBigO}
             onChange={setBruteForceBigO}
             onBlur={save}
@@ -199,13 +208,20 @@ export function SolveFlow({ problem }: Props) {
             rows={2}
           />
         </div>
+
+        <HintPanel
+          problemId={problem.id}
+          getFirstThought={() => firstThoughtRef.current}
+          onHintUsed={setHintsUsed}
+        />
+
         {!started ? (
           <button
             onClick={() => {
               setStarted(true);
               save();
             }}
-            disabled={!firstThought.trim() || !bruteForceBigO.trim()}
+            disabled={!firstThought.trim()}
             className="btn btn-primary"
           >
             Start timer &amp; open workspace
@@ -218,7 +234,7 @@ export function SolveFlow({ problem }: Props) {
       {/* Stage 2 */}
       {started && (
         <Stage n={2} title="Solve" open>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             {LANGS.map((l) => (
               <button
                 key={l}
@@ -239,8 +255,8 @@ export function SolveFlow({ problem }: Props) {
             onBlur={save}
             spellCheck={false}
             rows={14}
-            placeholder="Paste your solution here after solving on LeetCode…"
-            className="w-full rounded-lg border border-border bg-bg-inset p-3 font-mono text-sm text-text outline-none focus:border-accent"
+            placeholder="Paste your solution here (bugs and all — the analysis is more useful on real attempts)…"
+            className="w-full p-3 font-mono text-sm"
           />
           <Field
             label="Why does this work? (the invariant / the insight)"
@@ -249,26 +265,15 @@ export function SolveFlow({ problem }: Props) {
             onBlur={save}
           />
 
-          <details className="rounded-lg border border-border bg-bg-raised p-3 text-sm">
-            <summary className="cursor-pointer text-text-dim">
-              Hints ({hintsUsed}/3 used)
-            </summary>
-            <ol className="mt-2 space-y-2">
-              {HINTS.slice(0, hintsUsed).map((h, i) => (
-                <li key={i} className="text-text-dim">
-                  {i + 1}. {h}
-                </li>
-              ))}
-            </ol>
-            {hintsUsed < 3 && (
-              <button
-                onClick={() => setHintsUsed((n) => n + 1)}
-                className="mt-2 text-xs text-accent"
-              >
-                Reveal hint {hintsUsed + 1} →
-              </button>
-            )}
-          </details>
+          <div className="panel-inset p-3">
+            <p className="label mb-2">Hints</p>
+            <HintPanel
+              problemId={problem.id}
+              getFirstThought={() => firstThoughtRef.current}
+              onHintUsed={setHintsUsed}
+              compact
+            />
+          </div>
 
           <button
             onClick={runAnalysis}
@@ -277,6 +282,10 @@ export function SolveFlow({ problem }: Props) {
           >
             {analyzing ? "Analyzing…" : "Submit for analysis"}
           </button>
+          <p className="text-xs text-text-faint">
+            Analysis is feedback only — it doesn&apos;t change your streak or graph.
+            Stage 4 does.
+          </p>
           {error && <p className="text-sm text-danger">{error}</p>}
         </Stage>
       )}
@@ -290,27 +299,42 @@ export function SolveFlow({ problem }: Props) {
 
       {/* Stage 4 */}
       {analysis && (
-        <Stage n={4} title="Record" open>
-          <p className="text-sm text-text-dim">
-            How did that feel? This ticks the problem and updates your knowledge graph.
+        <section
+          ref={recordRef}
+          className="panel p-5 sm:p-6"
+          style={{ borderTop: "2px solid var(--accent)" }}
+        >
+          <p className="label mb-1 flex items-center gap-2">
+            <span className="grid h-5 w-5 place-items-center rounded-full border border-accent text-[10px] text-accent">
+              4
+            </span>
+            Record — this is what counts
           </p>
+          <p className="mb-4 text-sm text-text-dim">
+            Tap one below so this attempt updates your streak, the problem&apos;s
+            status, and the knowledge graph.{" "}
+            {suggested === "solved"
+              ? "Your code looks correct — mark it solved."
+              : "Your code didn't fully work — that's fine, record it honestly."}
+          </p>
+
           <div className="flex flex-wrap gap-2">
             {(["easy", "ok", "hard"] as const).map((r) => (
               <button
                 key={r}
                 disabled={recording}
                 onClick={() => record(r, true)}
-                className="btn btn-sm capitalize"
+                className="btn btn-primary btn-sm capitalize"
               >
                 Solved · {r}
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="mt-2 flex flex-wrap gap-2">
             <button
               disabled={recording}
               onClick={() => record("hard", true, true)}
-              className="rounded-lg border border-accent-warm/40 px-4 py-2 text-sm text-accent-warm hover:bg-bg-raised disabled:opacity-40"
+              className="btn btn-sm text-accent-warm"
             >
               Solved but flag to revise ⟳
             </button>
@@ -322,18 +346,17 @@ export function SolveFlow({ problem }: Props) {
               Didn&apos;t solve — flag to revise
             </button>
           </div>
-          <div className="flex flex-wrap items-center gap-3 pt-1">
-            <Link
-              href={`/interview/${problem.id}`}
-              className="text-xs text-accent"
-            >
-              Do a mock interview on this →
+          <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-3">
+            <Link href={`/interview/${problem.id}`} className="text-xs text-accent">
+              Mock interview on this →
             </Link>
-            <Link href="/" className="text-xs text-text-faint">
-              Skip &amp; go to dashboard
-            </Link>
+            {!recorded && (
+              <Link href="/" className="text-xs text-text-faint">
+                Skip (won&apos;t count)
+              </Link>
+            )}
           </div>
-        </Stage>
+        </section>
       )}
     </div>
   );
@@ -387,7 +410,7 @@ function Field({
         onBlur={onBlur}
         placeholder={placeholder}
         rows={rows}
-        className="w-full rounded-lg border border-border bg-bg-inset p-2.5 text-sm text-text outline-none focus:border-accent"
+        className="w-full p-2.5 text-sm"
       />
     </label>
   );
